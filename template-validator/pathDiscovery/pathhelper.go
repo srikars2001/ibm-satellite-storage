@@ -9,10 +9,39 @@ import (
 )
 
 // getFilesPath helps to locate the folder where files are present.
-func GetFilesPath(driverName string, version string) (string, error) {
+func GetFilesPath(driverName string, version string) string {
 	providerName := getProviderName(driverName)
-	fmt.Println("provider name : ", providerName)
-	return "", nil
+	// fmt.Println("provider name : ", providerName)
+	tempFilePath := "./config-templates/" + providerName + "/" + driverName + "/"
+
+	cv := checkVersion(tempFilePath, version)
+
+	if !cv {
+		log.Fatal("Version : ", version, " not found in driver-name :", driverName, " || provider :", providerName)
+	}
+
+	filePath := tempFilePath + version + "/"
+
+	fmt.Println("file path = ", filePath)
+
+	return filePath
+}
+
+// checkVersion takes path as argument and checks whether the version is present,
+// the program will quit if the version is not present in the pathName folder
+func checkVersion(pathName string, version string) bool {
+	entries, err := os.ReadDir(pathName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, e := range entries {
+		if e.Name() == version {
+			return true
+		}
+	}
+
+	return false
 }
 
 // takes driverName as parameter and gets the provider name.

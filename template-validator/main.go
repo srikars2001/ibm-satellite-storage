@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	musJsonValidation "templateValidator/mustachejsonvalidation"
 	pathdiscovery "templateValidator/pathDiscovery"
 )
 
@@ -18,6 +19,10 @@ func main() {
 	fmt.Println("driverName: ", *providerName)
 	fmt.Println("version: ", *version)
 
-	pathdiscovery.GetFilesPath(*providerName, *version)
+	filePath := pathdiscovery.GetFilesPath(*providerName, *version)
+
+	tempValidator := musJsonValidation.Construct(filePath)
+
+	tempValidator.ValidateFiles()
 
 }
