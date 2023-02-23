@@ -67,7 +67,7 @@ items:
         storageClassName: "sat-local-file-gold"
         volumeMode: Filesystem
         fsType: "{{ fstype }}"
-    {{/auto-discover-devices}}
+    {{auto-discover-devices}}    #removing / doesnt throw any error
     {{^auto-discover-devices}}
     - apiVersion: local.storage.openshift.io/v1
       kind: LocalVolume
@@ -81,18 +81,18 @@ items:
                         - key: "{{ label-key }}"
                           operator: In
                           values:
-                          - "{{ label-value }}"
+                          - "{{ label-valu }}"
           storageClassDevices:
               - storageClassName: "sat-local-file-gold"
                 volumeMode: Filesystem
                 fsType: "{{ fstype }}"
-                {{#devicepath?}}
+                {{devicepath?}}
                 devicePaths:
                 {{/devicepath?}}
                   {{#devicepath}}
                   - "{{{ item }}}"
                   {{/devicepath}}
-    {{/auto-discover-devices}}
+    {{auto-discover-devices}}
     - apiVersion: satstorage.ibm.com/v1
       kind: SatStorageCleanup
       metadata:

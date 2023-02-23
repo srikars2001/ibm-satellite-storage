@@ -1,0 +1,13 @@
+{
+	"driverName": "local-volume-block",
+	"driverVersion": "4.10",
+	"warnings": [
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-block/4.10/",
+			"message": "item == missing in json parent value : devicepath"
+		}
+	],
+	"errors": null
+}

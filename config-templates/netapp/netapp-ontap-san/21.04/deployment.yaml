@@ -42,7 +42,7 @@ items:
                   - name: MGMT_LIF
                     value: "{{{ managementLIF }}}"
                   - name: DATA_LIF
-                    value: "{{{ dataLIF }}}"
+                    value: "{{ dataLIF }}}"
                   - name: SVM_Name
                     value: "{{{ svm }}}"
                   - name: USER_Name

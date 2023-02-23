@@ -1,0 +1,19 @@
+{
+	"driverName": "netapp-ontap-san",
+	"driverVersion": "21.04",
+	"warnings": null,
+	"errors": [
+		{
+			"parameter": "dataLIF",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/netapp/netapp-ontap-san/21.04/",
+			"message": "brackets mismatch for the YAML mustache value :  {{ dataLIF }}}"
+		},
+		{
+			"parameter": "allowVolumeExpansion: { allowVolumeExpansion }}",
+			"filename": "storage-class-template.yaml -  storage-class-parameters.json",
+			"filepath": "./config-templates/netapp/netapp-ontap-san/21.04/",
+			"message": "brackets mismatch {{ unable to clean --- '{{' missing in .yaml file line allowVolumeExpansion: { allowVolumeExpansion }}"
+		}
+	]
+}

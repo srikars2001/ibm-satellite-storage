@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 type validator struct {
@@ -31,27 +32,38 @@ func Construct(filePath string, driverName string, version string) *validator {
 // starts validation process calls handleTemplateJSONValidation for each pair
 func (v *validator) ValidateFiles() {
 	// validate files for each combination
-	defer printReport()
+	defer v.SaveReport()
+	//defer printReport()
 
 	filePairs := v.checkFilesForValidation()
 	fmt.Println("filepairs : ", filePairs)
 	fmt.Println()
 
 	for _, pair := range filePairs {
-		v.HandleTemplateJSONValidation(pair.jsonPath, pair.templatePath)
+
+		filePairsInfo := ""
+
+		tPath := pair.templatePath
+		if strings.Contains(tPath, "deployment") {
+			filePairsInfo = "deployment.yaml - customParams.json"
+		} else {
+			filePairsInfo = "storage-class-template.yaml -  storage-class-parameters.json"
+		}
+
+		v.HandleTemplateJSONValidation(pair.jsonPath, pair.templatePath, filePairsInfo)
 	}
 
 }
 
 // responsible for validating the given files
-func (v *validator) HandleTemplateJSONValidation(jsonPath string, templatePath string) {
-	templateValues := v.readJSONAndShowBrackets(templatePath)
-	jsonValues := v.handleCustomParamsJSON(jsonPath)
+func (v *validator) HandleTemplateJSONValidation(jsonPath string, templatePath string, filePairs string) {
+	templateValues := v.readJSONAndShowBrackets(templatePath, filePairs)
+	jsonValues := v.handleCustomParamsJSON(jsonPath, filePairs)
 
 	fmt.Println("templateValues : ", templateValues)
 	fmt.Println("\n\njsonValues : ", jsonValues)
 
-	v.CheckFaultsJSONYAML(templateValues, jsonValues)
+	v.CheckFaultsJSONYAML(templateValues, jsonValues, filePairs)
 
 }
 

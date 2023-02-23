@@ -1,0 +1,38 @@
+{
+	"driverName": "local-volume-file",
+	"driverVersion": "4.10",
+	"warnings": [
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
+			"message": "item == missing in json parent value : devicepath"
+		}
+	],
+	"errors": [
+		{
+			"parameter": "label-valu",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
+			"message": "label-valu == missing in json"
+		},
+		{
+			"parameter": "devicepath",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
+			"message": "devicepath == missing in json"
+		},
+		{
+			"parameter": "devicepath",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
+			"message": "error in validating yaml mustache template \n===\n  current mustache structure :  {/ devicepath ?} \n\n previous stack value {^ auto-discover-devices $$$}\n"
+		},
+		{
+			"parameter": "multiple",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
+			"message": "Error :  the values  [{# auto-discover-devices $$$} {^ auto-discover-devices $$$}]  doesnt have closing brackets\n"
+		}
+	]
+}
