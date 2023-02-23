@@ -212,7 +212,7 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 					ew := Warnings{
 						Parameter: pk.value,
 						Filepath:  v.filePath,
-						Message:   pk.value + " == missing in json" + " parent value : " + temp.value,
+						Message:   pk.value + " == missing in json" + " ,parent value : " + temp.value,
 						Filename:  filePairs,
 					}
 
@@ -240,12 +240,14 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 		}
 		errorsArray = append(errorsArray, ew)
 
+		statusOk = false
+
 	}
 
 	if statusOk {
-		log.Println(string(colorGreen), "No errors found", string(colorReset))
+		log.Println(string(colorGreen), "No errors found in ", filePairs, string(colorReset))
 	} else {
-		log.Println(string(colorRed), "errors or warning found in filepath", string(colorYellow), v.filePath, string(colorReset))
+		log.Println(string(colorRed), "errors or warning found in filepath", string(colorYellow), v.filePath, " in file pairs :", filePairs, string(colorReset))
 	}
 
 	if v.isDebug {

@@ -60,8 +60,8 @@ func (v *validator) HandleTemplateJSONValidation(jsonPath string, templatePath s
 	templateValues := v.readJSONAndShowBrackets(templatePath, filePairs)
 	jsonValues := v.handleCustomParamsJSON(jsonPath, filePairs)
 
-	fmt.Println("templateValues : ", templateValues)
-	fmt.Println("\n\njsonValues : ", jsonValues)
+	// fmt.Println("templateValues : ", templateValues)
+	// fmt.Println("\n\njsonValues : ", jsonValues)
 
 	v.CheckFaultsJSONYAML(templateValues, jsonValues, filePairs)
 

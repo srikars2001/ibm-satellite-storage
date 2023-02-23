@@ -1,0 +1,38 @@
+{
+	"driverName": "ridge-csi-driver",
+	"driverVersion": "1.0.0",
+	"driverPath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+	"warnings": [
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+			"message": "item == missing in json ,parent value : provisioner-parameters"
+		},
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+			"message": "item == missing in json ,parent value : attacher-parameters"
+		},
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+			"message": "item == missing in json ,parent value : statefulset-parameters"
+		},
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+			"message": "item == missing in json ,parent value : resizer-parameters"
+		},
+		{
+			"parameter": "item",
+			"filename": "deployment.yaml - customParams.json",
+			"filepath": "./config-templates/ridge/ridge-csi-driver/1.0.0/",
+			"message": "item == missing in json ,parent value : daemonset-parameters"
+		}
+	],
+	"errors": null
+}

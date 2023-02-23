@@ -1,6 +1,7 @@
 {
 	"driverName": "netapp-ontap-nas",
 	"driverVersion": "22.04",
+	"driverPath": "./config-templates/netapp/netapp-ontap-nas/22.04/",
 	"warnings": null,
 	"errors": null
 }

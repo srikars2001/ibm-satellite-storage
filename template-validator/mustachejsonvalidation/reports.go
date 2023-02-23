@@ -24,6 +24,7 @@ type ErrorsStruct struct {
 type OutputJSON struct {
 	DriverName    string         `json:"driverName"`
 	DriverVersion string         `json:"driverVersion"`
+	DriverPath    string         `json:"driverPath"`
 	Warnings      []Warnings     `json:"warnings"`
 	Errors        []ErrorsStruct `json:"errors"`
 }
@@ -53,6 +54,7 @@ func (v *validator) SaveReport() {
 	opJson := OutputJSON{
 		DriverName:    v.driverName,
 		DriverVersion: v.version,
+		DriverPath:    v.filePath,
 		Warnings:      warningsArray,
 		Errors:        errorsArray,
 	}
@@ -63,6 +65,12 @@ func (v *validator) SaveReport() {
 	}
 	fmt.Println("\n\nERRORS AND WARNINGS")
 	os.Stdout.Write(b)
+
+	err = os.Mkdir("RESULTS", 0777)
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	outputFilePath := "./RESULTS/" + v.driverName + "_" + v.version + ".json"
 

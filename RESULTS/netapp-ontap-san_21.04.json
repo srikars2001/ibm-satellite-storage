@@ -1,6 +1,7 @@
 {
 	"driverName": "netapp-ontap-san",
 	"driverVersion": "21.04",
+	"driverPath": "./config-templates/netapp/netapp-ontap-san/21.04/",
 	"warnings": null,
 	"errors": [
 		{
