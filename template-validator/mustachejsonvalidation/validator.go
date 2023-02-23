@@ -7,7 +7,10 @@ import (
 )
 
 type validator struct {
-	filePath string
+	filePath   string
+	isDebug    bool
+	driverName string
+	version    string
 }
 
 type validationPairs struct {
@@ -16,17 +19,40 @@ type validationPairs struct {
 }
 
 // constructor
-func Construct(filePath string) *validator {
+func Construct(filePath string, driverName string, version string) *validator {
 	return &validator{
-		filePath: filePath,
+		filePath:   filePath,
+		isDebug:    false,
+		driverName: driverName,
+		version:    version,
 	}
 }
 
-// starts validation process
+// starts validation process calls handleTemplateJSONValidation for each pair
 func (v *validator) ValidateFiles() {
 	// validate files for each combination
+	defer printReport()
+
 	filePairs := v.checkFilesForValidation()
-	fmt.Println(filePairs)
+	fmt.Println("filepairs : ", filePairs)
+	fmt.Println()
+
+	for _, pair := range filePairs {
+		v.HandleTemplateJSONValidation(pair.jsonPath, pair.templatePath)
+	}
+
+}
+
+// responsible for validating the given files
+func (v *validator) HandleTemplateJSONValidation(jsonPath string, templatePath string) {
+	templateValues := v.readJSONAndShowBrackets(templatePath)
+	jsonValues := v.handleCustomParamsJSON(jsonPath)
+
+	fmt.Println("templateValues : ", templateValues)
+	fmt.Println("\n\njsonValues : ", jsonValues)
+
+	v.CheckFaultsJSONYAML(templateValues, jsonValues)
+
 }
 
 // check which files to validate

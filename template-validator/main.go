@@ -8,20 +8,20 @@ import (
 )
 
 var (
-	providerName = flag.String("driverName", "", "driver_name")
-	version      = flag.String("version", "", "version")
+	driverName = flag.String("driverName", "", "driver_name")
+	version    = flag.String("version", "", "version")
 )
 
 func main() {
 	flag.Parse()
 	fmt.Println("Template-validation started")
 
-	fmt.Println("driverName: ", *providerName)
+	fmt.Println("driverName: ", *driverName)
 	fmt.Println("version: ", *version)
 
-	filePath := pathdiscovery.GetFilesPath(*providerName, *version)
+	filePath := pathdiscovery.GetFilesPath(*driverName, *version)
 
-	tempValidator := musJsonValidation.Construct(filePath)
+	tempValidator := musJsonValidation.Construct(filePath, *driverName, *version)
 
 	tempValidator.ValidateFiles()
 
