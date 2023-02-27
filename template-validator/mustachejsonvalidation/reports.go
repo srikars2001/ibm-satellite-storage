@@ -8,17 +8,17 @@ import (
 )
 
 type Warnings struct {
-	Parameter string `json:"parameter"`
-	Filename  string `json:"filename"`
-	Filepath  string `json:"filepath"`
-	Message   string `json:"message"`
+	Parameter  string `json:"parameter"`
+	Filepath   string `json:"filepath"`
+	Message    string `json:"message"`
+	LineNumber int    `json:"linenumber"`
 }
 
 type ErrorsStruct struct {
-	Parameter string `json:"parameter"`
-	Filename  string `json:"filename"`
-	Filepath  string `json:"filepath"`
-	Message   string `json:"message"`
+	Parameter  string `json:"parameter"`
+	Filepath   string `json:"filepath"`
+	Message    string `json:"message"`
+	LineNumber int    `json:"linenumber"`
 }
 
 type OutputJSON struct {
@@ -96,11 +96,20 @@ func (v *validator) SaveReport() {
 
 }
 
-// func CreateErrorsStruct(parameter string, filename string, message string, filepath string) ErrorsStruct {
-// 	return ErrorsStruct{
-// 		Parameter: parameter,
-// 		Filename:  filename,
-// 		Filepath:  filepath,
-// 		Message:   message,
-// 	}
-// }
+func CreateErrorsStruct(parameter string, filepath string, message string, linenumber int) ErrorsStruct {
+	return ErrorsStruct{
+		Parameter:  parameter,
+		Filepath:   filepath,
+		Message:    message,
+		LineNumber: linenumber,
+	}
+}
+
+func CreateWarningStruct(parameter string, filepath string, message string, linenumber int) Warnings {
+	return Warnings{
+		Parameter:  parameter,
+		Filepath:   filepath,
+		Message:    message,
+		LineNumber: linenumber,
+	}
+}

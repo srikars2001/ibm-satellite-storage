@@ -1,9 +1,10 @@
 package mustachejsonvalidation
 
 type ParamKeys struct {
-	prefix string
-	value  string
-	suffix string
+	prefix   string
+	value    string
+	suffix   string
+	lineInfo lineInfo
 }
 
 type Stack []ParamKeys

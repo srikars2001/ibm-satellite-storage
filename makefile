@@ -22,7 +22,6 @@ test_all_ok_redhat_odf_local:
 test_all_ok_netapp_ontap_nas:
 	./templateValidator --driverName=netapp-ontap-nas  --version=22.04
 
-
 .PHONY: 
 	build test clear_results test_ontap_san_brackets_mismatch test_redhat_local_volume_file test_all_ok_redhat_odf_local	
 	test_all_ok_netapp_ontap_nas

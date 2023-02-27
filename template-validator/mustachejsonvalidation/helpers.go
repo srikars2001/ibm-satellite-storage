@@ -21,9 +21,25 @@ var (
 	statusOk = true // statusok is false when errors or warnings are produced
 )
 
-// reads json file and shows the line which has "{{"
-func (v *validator) readJSONAndShowBrackets(templatePath string, filePairs string) []string {
-	var lists []string
+// line info
+type lineInfo struct {
+	line     string
+	lineNo   int
+	fileName string
+}
+
+// reads .yaml files and shows the line which has "{{"
+func (v *validator) readJSONAndShowBrackets(templatePath string, filePairs string) []lineInfo {
+	// var lists []string
+
+	jsonFileName := ""
+	if strings.Contains(filePairs, "deployment") {
+		jsonFileName = "deployment.yaml"
+	} else {
+		jsonFileName = "storage-class-template.yaml"
+	}
+
+	var lineLists []lineInfo
 
 	file, err := os.Open(templatePath)
 	if err != nil {
@@ -35,11 +51,22 @@ func (v *validator) readJSONAndShowBrackets(templatePath string, filePairs strin
 
 	scanner := bufio.NewScanner(file)
 
+	lineNumber := 1
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "{{") || strings.Contains(line, "}}") {
-			lists = append(lists, line)
+			lineTypeInfo := lineInfo{
+				line:     line,
+				lineNo:   lineNumber,
+				fileName: jsonFileName,
+			}
+			// lists = append(lists, line)
+			lineLists = append(lineLists, lineTypeInfo)
+
 		}
+		lineNumber = lineNumber + 1
+
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -48,64 +75,63 @@ func (v *validator) readJSONAndShowBrackets(templatePath string, filePairs strin
 	}
 
 	if v.isDebug {
-		fmt.Println("=====================LINES WiTH BRACKETS====================\n", templatePath)
-		for _, value := range lists {
-			fmt.Println(value)
-		}
+		fmt.Println("=====================LINES WiTH BRACKETS AND INFO====================\n", templatePath)
+		// for _, value := range lists {
+		// 	fmt.Println(value)
+		// }
+		fmt.Println(lineLists)
+
 		fmt.Println("=====================END====================")
 	}
 
-	var clean []string
+	var cleanLineLists []lineInfo
 
-	for _, line := range lists {
+	for _, singleLineInfo := range lineLists {
 		//startingComment := strings.Index(line,"#")
 
-		startingIndex := strings.Index(line, "{{")
+		startingIndex := strings.Index(singleLineInfo.line, "{{")
 
 		if startingIndex == -1 {
-			log.Println("unable to clean --- '{{' missing in .yaml file: ", templatePath, line)
-			ew := ErrorsStruct{
-				Parameter: line,
-				Filepath:  v.filePath,
-				Message:   "brackets mismatch {{ " + "unable to clean --- '{{' missing in .yaml file line " + line,
-				Filename:  filePairs,
-			}
+			log.Println("unable to clean --- '{{' missing in .yaml file: ", templatePath, singleLineInfo.line, " in line number : ", singleLineInfo.lineNo)
+			errMsg := "brackets mismatch {{ " + "unable to clean --- '{{' missing in .yaml file line " + singleLineInfo.line
 
+			ew := CreateErrorsStruct(singleLineInfo.line, v.filePath+singleLineInfo.fileName, errMsg, singleLineInfo.lineNo)
 			errorsArray = append(errorsArray, ew)
 			continue
 		}
 
-		lastIndex := strings.LastIndex(line, "}}")
+		lastIndex := strings.LastIndex(singleLineInfo.line, "}}")
 
 		if lastIndex == -1 {
-			log.Println("unable to clean --- '}}' missing in .yaml file: ", templatePath, line)
+			log.Println("unable to clean --- '}}' missing in .yaml file: ", templatePath, singleLineInfo.line)
 
-			ew := ErrorsStruct{
-				Parameter: line,
-				Filepath:  v.filePath,
-				Message:   "brackets-mismatch }} " + "unable to clean --- '}}' missing in .yaml file line " + line,
-				Filename:  filePairs,
-			}
-
+			errMsg := "brackets-mismatch }} " + "unable to clean --- '}}' missing in .yaml file line " + singleLineInfo.line
+			ew := CreateErrorsStruct(singleLineInfo.line, v.filePath+singleLineInfo.fileName, errMsg, singleLineInfo.lineNo)
 			errorsArray = append(errorsArray, ew)
 			continue
 		}
 
-		tempString := line[startingIndex : lastIndex+2]
+		tempString := singleLineInfo.line[startingIndex : lastIndex+2]
+		tempLineInfo := lineInfo{
+			line:     tempString,
+			lineNo:   singleLineInfo.lineNo,
+			fileName: singleLineInfo.fileName,
+		}
 
-		clean = append(clean, tempString)
+		cleanLineLists = append(cleanLineLists, tempLineInfo)
 
 	}
 
 	if v.isDebug {
-		fmt.Println("=====================CLEAN  BRACKETS====================\n", templatePath)
-		for _, value := range clean {
-			fmt.Println(value)
-		}
+		fmt.Println("=====================CLEAN  BRACKETS -- LINE INFO STRUCT====================\n", templatePath)
+		// for _, singleLineInfo := range cleanLineLists {
+		// 	fmt.Println(value)
+		// }
+		fmt.Println(cleanLineLists)
 		fmt.Println("=====================END====================")
 	}
 
-	return clean
+	return cleanLineLists
 }
 
 func (v *validator) handleCustomParamsJSON(jsonPath string, filePairs string) map[string]struct{} {
@@ -150,7 +176,7 @@ func (v *validator) handleCustomParamsJSON(jsonPath string, filePairs string) ma
 	return l
 }
 
-func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[string]struct{}, filePairs string) {
+func (v *validator) CheckFaultsJSONYAML(templateValues []lineInfo, jsonValues map[string]struct{}, filePairs string) {
 	var stack Stack
 
 	if v.isDebug {
@@ -164,14 +190,11 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 		} else if pk.prefix == "/" {
 			temp, ok := stack.Peek()
 			if !ok {
-				log.Println(fmt.Sprintln("stack is empty ==> the key: ", pk.value, "has missing opening statement either '#' or '^' "))
-				ew := ErrorsStruct{
-					Parameter: pk.value,
-					Filepath:  v.filePath,
-					Message:   fmt.Sprintln("stack is empty ==> the key: ", pk.value, "has missing opening statement either '#' or '^' "),
-					Filename:  filePairs,
-				}
+				log.Println(fmt.Sprintln("stack is empty ==> the key: ", pk.value, "on line number : ", pk.lineInfo.lineNo, " has missing opening statement either '#' or '^' ", " in file name ", pk.lineInfo.fileName))
 
+				statusOk = false
+				errMsg := fmt.Sprintln("stack is empty == the key: ", pk.value, "on line number : ", pk.lineInfo.lineNo, "has missing opening statement either '#' or '^' ", " in file name ", pk.lineInfo.fileName)
+				ew := CreateErrorsStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
 				errorsArray = append(errorsArray, ew)
 			}
 
@@ -180,14 +203,17 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 			} else {
 				log.Println(string(colorRed), "error in validating yaml mustache template \n=== ")
 				log.Println("current mustache structure ", pk)
-				log.Println("previous stack value", temp, string(colorReset))
+				log.Println("previous stack value ", temp, string(colorReset))
+
 				statusOk = false
-				ew := ErrorsStruct{
-					Parameter: pk.value,
-					Filepath:  v.filePath,
-					Message:   fmt.Sprintln("error in validating yaml mustache template \n===\n ", "current mustache structure : ", pk, "\n\n previous stack value", temp),
-					Filename:  filePairs,
-				}
+				errMsg := fmt.Sprintln("error in validating yaml mustache template  ", "current mustache structure : ", pk, " ||||  previous stack value : ", temp)
+				ew := CreateErrorsStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
+				// ew := ErrorsStruct{
+				// 	Parameter: pk.value,
+				// 	Filepath:  v.filePath,
+				// 	Message:   fmt.Sprintln("error in validating yaml mustache template  ", "current mustache structure : ", pk, "\n\n previous stack value : ", temp),
+				// 	Filename:  filePairs,
+				// }
 				errorsArray = append(errorsArray, ew)
 			}
 		} else {
@@ -196,25 +222,30 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 
 				temp, ok := stack.Peek()
 				if !ok || temp.prefix != "#" {
-					log.Println(fmt.Sprintln(string(colorRed), "error", pk.value, "===> missing in json", string(colorReset)))
-					statusOk = false
-					ew := ErrorsStruct{
-						Parameter: pk.value,
-						Filepath:  v.filePath,
-						Message:   pk.value + " == missing in json",
-						Filename:  filePairs,
-					}
+					log.Println(fmt.Sprintln(string(colorRed), "error", pk.value, "===> missing in json ", "used in  file: ", pk.lineInfo.fileName, "in line number : ", pk.lineInfo.lineNo, string(colorReset)))
 
+					statusOk = false
+					errMsg := fmt.Sprintln("error: ", pk.value, "=== missing in json ", "used in  file: ", pk.lineInfo.fileName, "in line number : ", pk.lineInfo.lineNo)
+					ew := CreateErrorsStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
+					// ew := ErrorsStruct{
+					// 	Parameter: pk.value,
+					// 	Filepath:  v.filePath,
+					// 	Message:   fmt.Sprintln("error: ", pk.value, "=== missing in json ", "used in  file: ", pk.lineInfo.fileName, "in line number : ", pk.lineInfo.lineNo),
+					// 	Filename:  filePairs,
+					// }
 					errorsArray = append(errorsArray, ew)
 				} else {
-					log.Println(fmt.Sprintln(string(colorYellow), "warning", pk.value, "===> missing in json", string(colorReset)))
+					log.Println(fmt.Sprintln(string(colorYellow), "warning", pk.value, "===> missing in json", " used in  file: ", pk.lineInfo.fileName, " in line number : ", pk.lineInfo.lineNo), " parent value: ", temp.value, string(colorReset))
+
 					statusOk = false
-					ew := Warnings{
-						Parameter: pk.value,
-						Filepath:  v.filePath,
-						Message:   pk.value + " == missing in json" + " ,parent value : " + temp.value,
-						Filename:  filePairs,
-					}
+					errMsg := fmt.Sprintln("warning", pk.value, "=== missing in json", " used in  file: ", pk.lineInfo.fileName, " in line number : ", pk.lineInfo.lineNo, " parent value: ", temp.value)
+					ew := CreateWarningStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
+					// ew := Warnings{
+					// 	Parameter: pk.value,
+					// 	Filepath:  v.filePath,
+					// 	Message:   fmt.Sprintln("warning", pk.value, "=== missing in json", " used in  file: ", pk.lineInfo.fileName, " in line number : ", pk.lineInfo.lineNo, " parent value: ", temp.value),
+					// 	Filename:  filePairs,
+					// }
 
 					warningsArray = append(warningsArray, ew)
 				}
@@ -230,17 +261,40 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 
 	if !stack.IsEmpty() {
 		//error report
-		log.Println(fmt.Sprintln(string(colorRed), "Error : ", "the values ", stack, " doesnt have closing brackets", string(colorReset)))
+		for !stack.IsEmpty() {
 
-		ew := ErrorsStruct{
-			Parameter: "multiple",
-			Filepath:  v.filePath,
-			Message:   fmt.Sprintln("Error : ", "the values ", stack, " doesnt have closing brackets"),
-			Filename:  filePairs,
+			pk, ok := stack.Peek()
+			if !ok {
+				break
+			}
+			log.Println(fmt.Sprintln(string(colorRed), "Error : ", "the value ", pk.lineInfo.line, " doesnt have closing syntax", " on line no : ", pk.lineInfo.lineNo, " in file ", pk.lineInfo.fileName, string(colorReset)))
+
+			errMsg := fmt.Sprintln("Error : ", "the value ", pk.lineInfo.line, " doesnt have closing syntax", " on line no : ", pk.lineInfo.lineNo, " in file ", pk.lineInfo.fileName)
+			ew := CreateErrorsStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
+			// ew := ErrorsStruct{
+			// 	Parameter: pk.value,
+			// 	Filepath:  v.filePath,
+			// 	Message:   fmt.Sprintln("Error : ", "the value ", pk.lineInfo.line, " doesnt have closing syntax", " on line no : ", pk.lineInfo.lineNo, " in file ", pk.lineInfo.fileName),
+			// 	Filename:  filePairs,
+			// }
+			errorsArray = append(errorsArray, ew)
+
+			statusOk = false
+
+			stack.Pop()
 		}
-		errorsArray = append(errorsArray, ew)
 
-		statusOk = false
+		// log.Println(fmt.Sprintln(string(colorRed), "Error : ", "the values ", stack, " doesnt have closing brackets", string(colorReset)))
+
+		// ew := ErrorsStruct{
+		// 	Parameter: "multiple",
+		// 	Filepath:  v.filePath,
+		// 	Message:   fmt.Sprintln("Error : ", "the values ", stack, " doesnt have closing brackets"),
+		// 	Filename:  filePairs,
+		// }
+		// errorsArray = append(errorsArray, ew)
+
+		// statusOk = false
 
 	}
 
@@ -256,17 +310,18 @@ func (v *validator) CheckFaultsJSONYAML(templateValues []string, jsonValues map[
 
 }
 
-func (v *validator) parseAndInit(value string, filePairs string) ParamKeys {
+func (v *validator) parseAndInit(value lineInfo, filePairs string) ParamKeys {
 	pk := ParamKeys{
-		prefix: "$$$",
-		suffix: "$$$",
+		prefix:   "$$$",
+		suffix:   "$$$",
+		lineInfo: value,
 	}
 
 	var numberOfbrackets int
 
 	var buffer string
 
-	for _, char := range value {
+	for _, char := range value.line {
 		if char == '{' {
 			numberOfbrackets = numberOfbrackets + 1
 		} else if char == '}' {
@@ -287,13 +342,16 @@ func (v *validator) parseAndInit(value string, filePairs string) ParamKeys {
 	if numberOfbrackets != 0 {
 		log.Println(string(colorRed), "brackets mismatch for the YAML mustache value :  ", value, string(colorReset))
 
+		errMsg := "brackets mismatch for the YAML mustache value :  " + pk.lineInfo.line + " on line number: " + string(pk.lineInfo.lineNo)
+
+		ew := CreateErrorsStruct(pk.value, v.filePath+pk.lineInfo.fileName, errMsg, pk.lineInfo.lineNo)
 		statusOk = false
-		ew := ErrorsStruct{
-			Parameter: pk.value,
-			Filepath:  v.filePath,
-			Message:   "brackets mismatch for the YAML mustache value :  " + value,
-			Filename:  filePairs,
-		}
+		// ew := ErrorsStruct{
+		// 	Parameter: pk.value,
+		// 	Filepath:  v.filePath,
+		// 	Message:   tempMsg,
+		// 	Filename:  filePairs,
+		// }
 
 		errorsArray = append(errorsArray, ew)
 	}

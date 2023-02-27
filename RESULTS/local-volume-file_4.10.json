@@ -1,38 +1,45 @@
 {
 	"driverName": "local-volume-file",
 	"driverVersion": "4.10",
+	"driverPath": "./config-templates/redhat/local-volume-file/4.10/",
 	"warnings": [
 		{
 			"parameter": "item",
-			"filename": "deployment.yaml - customParams.json",
-			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
-			"message": "item == missing in json parent value : devicepath"
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "warning item === missing in json  used in  file:  deployment.yaml  in line number :  93  parent value:  devicepath\n",
+			"linenumber": 93
 		}
 	],
 	"errors": [
 		{
 			"parameter": "label-valu",
-			"filename": "deployment.yaml - customParams.json",
-			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
-			"message": "label-valu == missing in json"
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "error:  label-valu === missing in json  used in  file:  deployment.yaml in line number :  84\n",
+			"linenumber": 84
 		},
 		{
 			"parameter": "devicepath",
-			"filename": "deployment.yaml - customParams.json",
-			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
-			"message": "devicepath == missing in json"
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "error:  devicepath === missing in json  used in  file:  deployment.yaml in line number :  89\n",
+			"linenumber": 89
 		},
 		{
 			"parameter": "devicepath",
-			"filename": "deployment.yaml - customParams.json",
-			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
-			"message": "error in validating yaml mustache template \n===\n  current mustache structure :  {/ devicepath ?} \n\n previous stack value {^ auto-discover-devices $$$}\n"
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "error in validating yaml mustache template   current mustache structure :  {/ devicepath ? {{{/devicepath?}} 91 deployment.yaml}}  ||||  previous stack value :  {^ auto-discover-devices $$$ {{{^auto-discover-devices}} 71 deployment.yaml}}\n",
+			"linenumber": 91
 		},
 		{
-			"parameter": "multiple",
-			"filename": "deployment.yaml - customParams.json",
-			"filepath": "./config-templates/redhat/local-volume-file/4.10/",
-			"message": "Error :  the values  [{# auto-discover-devices $$$} {^ auto-discover-devices $$$}]  doesnt have closing brackets\n"
+			"parameter": "auto-discover-devices",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "Error :  the value  {{^auto-discover-devices}}  doesnt have closing syntax  on line no :  71  in file  deployment.yaml\n",
+			"linenumber": 71
+		},
+		{
+			"parameter": "auto-discover-devices",
+			"filepath": "./config-templates/redhat/local-volume-file/4.10/deployment.yaml",
+			"message": "Error :  the value  {{#auto-discover-devices}}  doesnt have closing syntax  on line no :  36  in file  deployment.yaml\n",
+			"linenumber": 36
 		}
 	]
 }

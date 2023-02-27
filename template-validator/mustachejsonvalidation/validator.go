@@ -58,6 +58,14 @@ func (v *validator) ValidateFiles() {
 // responsible for validating the given files
 func (v *validator) HandleTemplateJSONValidation(jsonPath string, templatePath string, filePairs string) {
 	templateValues := v.readJSONAndShowBrackets(templatePath, filePairs)
+
+	if v.isDebug {
+		fmt.Println("++++++++++++++++++++++++++++++++++++\n\ntemplate values : ")
+		fmt.Println(templateValues)
+		fmt.Println("==================END=================")
+
+	}
+
 	jsonValues := v.handleCustomParamsJSON(jsonPath, filePairs)
 
 	// fmt.Println("templateValues : ", templateValues)
